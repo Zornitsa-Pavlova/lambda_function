@@ -1,3 +1,19 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:daee63b2a47fbbc623e8c63f5ed9b9a57555ee0b2f1ed813b2fc8ed9a8240203
-size 300
+terraform {
+ required_providers {
+  aws = {
+     source = "hashicorp/aws"
+     version = "~> 4.66.0"
+
+  }
+ random = {
+     source = "hashicorp/random"
+     version = "~> 3.5.0"
+  }
+
+ archive = {
+        source = "hashicorp/archive"
+        version = "~> 2.3.0"
+  }
+} 
+  required_version = "~> 1.4"
+}

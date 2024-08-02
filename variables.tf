@@ -1,3 +1,21 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:6e8168d49376007539767514b067099318e9d0c678c1dccf35dbd9f84bbb8a5f
-size 369
+variable "aws_region" {
+  description = "AWS region for all resources."
+  type = string
+  default = "eu-west-1"
+}
+
+variable "my_lambda_function" {
+  description = "lambda_function"
+  type        = string
+}
+
+variable "role_name" {
+  description = "lambda_role"
+  type        = string
+}
+
+variable "policy_name" {
+  description = "lambda_policy"
+  type        = string
+}
+

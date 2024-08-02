@@ -26,7 +26,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: 'eu-west-1'
         run: |
-          zip -r lambda_function.zip lambda_function.py
+          zip -r lambda_function.py
           aws lambda update-function-code --function-name lambda_function --zip-file fileb://lambda_function.zip  
 
   test: 

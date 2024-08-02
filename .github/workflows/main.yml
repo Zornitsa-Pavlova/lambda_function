@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python Environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'  # Specify the Python version here
+          python-version: '3.9'
 
       - name: Deploy to AWS Lambda
         env:
@@ -38,18 +38,20 @@ jobs:
       - name: Set up Python Environment
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'  # Specify the Python version here
+          python-version: '3.9'
 
       - name: Install Dependencies
-        env:
-         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-         AWS_REGION: 'eu-west-1'
-
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements_dev.txt
-  
+          pip install -r requirements.txt
+
+      - name: Set AWS Credentials
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: 'eu-west-1'
+        run: echo "AWS credentials set"
+
       - name: Run Test
         run: |
           python3 test_lambda_function.py

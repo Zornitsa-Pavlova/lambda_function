@@ -3,3 +3,6 @@ source/
 __pycache__/
 cache/
 venv/
+.index*/
+*terraform/
+

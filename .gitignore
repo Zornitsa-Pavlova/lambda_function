@@ -3,7 +3,7 @@ source/
 __pycache__/
 cache/
 venv/
-.terraform.lock.hcl/
+.terraform.lock.hcl
 .index.py.swp
 .index.py.swo
 .index.py.swn

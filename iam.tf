@@ -15,6 +15,11 @@ resource "aws_iam_role" "lambda_role" {
 EOF
 }
 
+resource "aws_cloudwatch_log_group" "lambda_log_group" {
+  name              = "/aws/lambda/${aws_lambda_function.lambda_function.function_name}"
+  retention_in_days = 7
+}
+
 resource "aws_iam_policy" "lambda_policy" {
   name        = "lambda-s3-policy"
   description = "IAM policy for Lambda to access S3"
@@ -27,7 +32,7 @@ resource "aws_iam_policy" "lambda_policy" {
       "Effect": "Allow",
       "Action": [
         "s3:PutObject",
-	"s3:GetObject"
+        "s3:GetObject"
       ],
       "Resource": "${aws_s3_bucket.lambda_bucket.arn}/*"
     },
@@ -68,6 +73,42 @@ resource "aws_s3_bucket_policy" "lambda_bucket_policy" {
   ]
 }
 EOF
+}
+
+resource "aws_iam_policy" "function_logging_policy" {
+  name   = "function-logging-policy"
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        Action : [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Effect : "Allow",
+        Resource : "arn:aws:logs:eu-west-1:555256523315:log-group:/aws/lambda/lambda_function:*"
+      }
+    ]
+  })
+}
+
+resource "aws_lambda_function" "lambda_function" {
+  function_name = "lambda_function"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "lambda_function.lambda_handler"
+  runtime       = "python3.9"
+  filename      = "lambda_function.zip"
+
+  environment {
+    variables = {
+      LOG_GROUP_NAME = aws_cloudwatch_log_group.lambda_log_group.name
+    }
+  }
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_logging_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.function_logging_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {

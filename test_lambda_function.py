@@ -34,11 +34,6 @@ class TestLambdaFunction(unittest.TestCase):
         self.assertIn('Messages processed successfully', response['body'])
         self.assertIn('Hello, world!', response['body'])
 
-        response = s3.put_object(
-         Bucket='dreamsofcode-noticeably-constantly-wondrous-wolf',
-            Key='message.txt',
-            Body='Hello, world!'
-                   )
 #       print(response)
 if __name__ == '__main__':
     unittest.main()

@@ -28,7 +28,7 @@ jobs:
         args: >-
             -Dsonar.projectKey=zornitsa-pavlova
             -Dsonar.organization=Zornitsa-Pavlova
-            # -Dsonar.sources=lambda_function.py
+
   test: 
     runs-on: ubuntu-latest
     steps:

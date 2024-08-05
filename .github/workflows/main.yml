@@ -8,6 +8,50 @@ on:
     branches: [main]
 
 jobs:
+  SonarCloudScan:
+
+   runs-on: ubuntu-latest
+
+   steps:
+    - uses: actions/checkout@v2
+      with:
+           fetch-depth: 0
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@v2.3.0
+       
+      env: 
+          GITHUB_TOKEN: ${{secrets.GH_TOKEN}}
+          SONAR_TOKEN: ${{secrets.SONAR_TOKEN}}
+      with: 
+        args: >-
+            -Dsonar.projectKey=zornitsa-pavlova
+            -Dsonar.organization=Zornitsa-Pavlova
+            -Dsonar.sources=src
+  test: 
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python Environment
+      uses: actions/setup-python@v2
+      with:
+       python-version: '3.9'
+
+    - name: Install Dependencies
+      run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements_dev.txt
+
+    - name: Configure AWS CLI
+      run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws configure set region eu-west-1
+
+    - name: Run Test
+      run: |
+          python3 test_lambda_function.py
   deploy:
     runs-on: ubuntu-latest
 
@@ -31,28 +75,4 @@ jobs:
           zip -r lambda_function.zip lambda_function.py
           aws lambda update-function-code --function-name lambda_function --zip-file fileb://lambda_function.zip  
 
-  test: 
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
 
-      - name: Set up Python Environment
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9'
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements_dev.txt
-
-      - name: Configure AWS CLI
-        run: |
-          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws configure set aws_secret_access_key ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws configure set region eu-west-1
-
-      - name: Run Test
-        run: |
-          python3 test_lambda_function.py

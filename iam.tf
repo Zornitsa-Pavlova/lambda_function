@@ -33,6 +33,15 @@ resource "aws_iam_policy" "lambda_policy" {
       "Action": [
         "s3:PutObject",
         "s3:GetObject"
+        
+  lifecycle_rule {
+    id      = "block-public-access"
+    status  = "Enabled"
+
+    block_public_acls       = true
+    block_public_policy     = true
+    ignore_public_acls      = true
+    restrict_public_buckets = true
       ],
       "Resource": "${aws_s3_bucket.lambda_bucket.arn}/*"
     },

@@ -25,6 +25,7 @@ resource "aws_iam_policy" "lambda_policy" {
   description = "IAM policy for Lambda to access S3"
 
   policy = <<EOF
+  
 {
   "Version": "2012-10-17",
   "Statement": [

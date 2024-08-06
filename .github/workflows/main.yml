@@ -19,7 +19,7 @@ jobs:
       with:
            fetch-depth: 0
     - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v2.3.0
+      uses: SonarSource/sonarcloud-github-action@v2.3.0@main  
        
       env: 
           GITHUB_TOKEN: ${{secrets.GH_TOKEN}}

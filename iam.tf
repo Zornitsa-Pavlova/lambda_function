@@ -62,6 +62,32 @@ EOF
 resource "aws_s3_bucket_policy" "lambda_bucket_policy" {
   bucket = aws_s3_bucket.lambda_bucket.id
 
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Id      = "lambda_bucket_policy",
+    Statement = [
+      {
+        Sid       = "HTTPSOnly",
+        Effect    = "Deny",
+        Principal = "*",
+        Action    = "s3:*",
+        Resource = [
+          "arn:aws:s3:::${aws_s3_bucket.lambda_bucket.id}",
+          "arn:aws:s3:::${aws_s3_bucket.lambda_bucket.id}/*"
+        ],
+        Condition = {
+          Bool = {
+            "aws:SecureTransport" = "false"
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_s3_bucket_policy" "lambda_bucket_policy" {
+  bucket = aws_s3_bucket.lambda_bucket.id
+
   policy = <<EOF
 {
   "Version": "2012-10-17",

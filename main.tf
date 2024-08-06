@@ -15,6 +15,23 @@ resource "aws_s3_bucket" "lambda_bucket" {
 
 }
 
+resource "aws_s3_bucket" "lambda_bucket" {
+  bucket = random_pet.lambda_bucket_name.id
+}
+
+resource "aws_s3_bucket_public_access_block" "lambda_bucket_public_access_block" {
+  bucket = aws_s3_bucket.lambda_bucket.id
+
+  block_public_acls   = true
+  block_public_policy = true
+  ignore_public_acls  = true
+  restrict_public_buckets = true
+}
+
+resource "aws_sqs_queue" "message_queue" {
+  name = "message_queue"
+}
+
 resource "aws_sqs_queue"  "message_queue" {
   name = "lambda_iac_queue"
 }

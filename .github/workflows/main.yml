@@ -22,8 +22,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
           args: >-
-            -Dsonar.projectKey=zornitsa-pavlova
-            -Dsonar.organization=Zornitsa-Pavlova
+            -Dsonar.projectKey=Zornitsa-Pavlova_lambda_function
+            -Dsonar.organization=zornitsa-pavlova
 
   test:
     runs-on: ubuntu-latest

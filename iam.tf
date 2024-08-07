@@ -25,7 +25,6 @@ resource "aws_iam_policy" "lambda_policy" {
   description = "IAM policy for Lambda to access S3"
 
   policy = <<EOF
-  
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -34,15 +33,6 @@ resource "aws_iam_policy" "lambda_policy" {
       "Action": [
         "s3:PutObject",
         "s3:GetObject"
-        
-  lifecycle_rule {
-    id      = "block-public-access"
-    status  = "Enabled"
-
-    block_public_acls       = true
-    block_public_policy     = true
-    ignore_public_acls      = true
-    restrict_public_buckets = true
       ],
       "Resource": "${aws_s3_bucket.lambda_bucket.arn}/*"
     },
@@ -63,36 +53,25 @@ EOF
 resource "aws_s3_bucket_policy" "lambda_bucket_policy" {
   bucket = aws_s3_bucket.lambda_bucket.id
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Id      = "lambda_bucket_policy",
-    Statement = [
-      {
-        Sid       = "HTTPSOnly",
-        Effect    = "Deny",
-        Principal = "*",
-        Action    = "s3:*",
-        Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.lambda_bucket.id}",
-          "arn:aws:s3:::${aws_s3_bucket.lambda_bucket.id}/*"
-        ],
-        Condition = {
-          Bool = {
-            "aws:SecureTransport" = "false"
-          }
-        }
-      }
-    ]
-  })
-}
-
-resource "aws_s3_bucket_policy" "lambda_bucket_policy" {
-  bucket = aws_s3_bucket.lambda_bucket.id
-
   policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
+    {
+      "Sid": "HTTPSOnly",
+      "Effect": "Deny",
+      "Principal": "*",
+      "Action": "s3:*",
+      "Resource": [
+        "arn:aws:s3:::${aws_s3_bucket.lambda_bucket.id}",
+        "arn:aws:s3:::${aws_s3_bucket.lambda_bucket.id}/*"
+      ],
+      "Condition": {
+        "Bool": {
+          "aws:SecureTransport": "false"
+        }
+      }
+    },
     {
       "Effect": "Allow",
       "Principal": {
@@ -117,12 +96,12 @@ resource "aws_iam_policy" "function_logging_policy" {
     "Version" : "2012-10-17",
     "Statement" : [
       {
-        Action : [
+        "Action" : [
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Effect : "Allow",
-        Resource : "arn:aws:logs:eu-west-1:555256523315:log-group:/aws/lambda/lambda_function:*"
+        "Effect" : "Allow",
+        "Resource" : "arn:aws:logs:eu-west-1:555256523315:log-group:/aws/lambda/lambda_function:*"
       }
     ]
   })
@@ -142,6 +121,20 @@ resource "aws_lambda_function" "lambda_function" {
   }
 }
 
+resource "aws_sns_topic_subscription" "lambda_alarm_subscription" {
+  topic_arn = aws_sns_topic.lambda_alarm_topic.arn
+  protocol  = "lambda"
+  endpoint  = aws_lambda_function.lambda_function.arn
+}
+
+resource "aws_lambda_permission" "allow_sns" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.lambda_alarm_topic.arn
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_logging_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.function_logging_policy.arn
@@ -155,4 +148,9 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 resource "aws_iam_role_policy_attachment" "lambda_s3_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "function_logging_policy_attachment" {
+  role       = aws_iam_role.lambda_role.id
+  policy_arn = aws_iam_policy.function_logging_policy.arn
 }

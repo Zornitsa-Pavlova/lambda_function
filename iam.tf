@@ -15,10 +15,10 @@ resource "aws_iam_role" "lambda_role" {
 EOF
 }
 
-resource "aws_cloudwatch_log_group" "lambda_log_group" {
-  name              = "/aws/lambda/${aws_lambda_function.lambda_function.function_name}"
-  retention_in_days = 7
-}
+# resource "aws_cloudwatch_log_group" "lambda_log_group" {
+#   name              = "/aws/lambda/${aws_lambda_function.lambda_function.function_name}"
+#   retention_in_days = 7
+# }
 
 resource "aws_iam_policy" "lambda_policy" {
   name        = "lambda-s3-policy"
@@ -107,33 +107,33 @@ resource "aws_iam_policy" "function_logging_policy" {
   })
 }
 
-resource "aws_lambda_function" "lambda_function" {
-  function_name = "lambda_function"
-  role          = aws_iam_role.lambda_role.arn
-  handler       = "lambda_function.lambda_handler"
-  runtime       = "python3.9"
-  filename      = "lambda_function.zip"
+# resource "aws_lambda_function" "lambda_function" {
+#   function_name = "lambda_function"
+#   role          = aws_iam_role.lambda_role.arn
+#   handler       = "lambda_function.lambda_handler"
+#   runtime       = "python3.9"
+#   filename      = "lambda_function.zip"
 
-  environment {
-    variables = {
-      LOG_GROUP_NAME = aws_cloudwatch_log_group.lambda_log_group.name
-    }
-  }
-}
+#   environment {
+#     variables = {
+#       LOG_GROUP_NAME = aws_cloudwatch_log_group.lambda_log_group.name
+#     }
+#   }
+# }
 
-resource "aws_sns_topic_subscription" "lambda_alarm_subscription" {
-  topic_arn = aws_sns_topic.lambda_alarm_topic.arn
-  protocol  = "lambda"
-  endpoint  = aws_lambda_function.lambda_function.arn
-}
+# resource "aws_sns_topic_subscription" "lambda_alarm_subscription" {
+#   topic_arn = aws_sns_topic.lambda_alarm_topic.arn
+#   protocol  = "lambda"
+#   endpoint  = aws_lambda_function.lambda_function.arn
+# }
 
-resource "aws_lambda_permission" "allow_sns" {
-  statement_id  = "AllowExecutionFromSNS"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.lambda_alarm_topic.arn
-}
+# resource "aws_lambda_permission" "allow_sns" {
+#   statement_id  = "AllowExecutionFromSNS"
+#   action        = "lambda:InvokeFunction"
+#   function_name = aws_lambda_function.lambda_function.function_name
+#   principal     = "sns.amazonaws.com"
+#   source_arn    = aws_sns_topic.lambda_alarm_topic.arn
+
 
 resource "aws_iam_role_policy_attachment" "lambda_logging_policy_attachment" {
   role       = aws_iam_role.lambda_role.name

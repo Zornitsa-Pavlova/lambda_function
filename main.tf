@@ -14,10 +14,6 @@ resource "aws_s3_bucket" "lambda_bucket" {
 
 }
 
-resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = random_pet.lambda_bucket_name.id
-}
-
 resource "aws_s3_bucket_public_access_block" "lambda_bucket_public_access_block" {
   bucket = aws_s3_bucket.lambda_bucket.id
 
@@ -31,21 +27,12 @@ resource "aws_sqs_queue" "message_queue" {
   name = "message_queue"
 }
 
-resource "aws_sqs_queue"  "message_queue" {
-  name = "lambda_iac_queue"
-}
-
 data "archive_file" "lambda_zip" {
   type = "zip"
   source_file = "/home/luser/project/modules/lambda_function.py"
   output_path = "/home/luser/project/modules/lambda_function.zip"
 }
 
- 
-resource "aws_cloudwatch_log_group" "example" {
-  name              = "/aws/lambda/${lambda_function_name}"
-  retention_in_days = 14
-}
 
 data "aws_iam_policy_document" "lambda_logging" {
   statement {
@@ -68,10 +55,6 @@ resource "aws_iam_policy" "lambda_logging" {
   policy      = data.aws_iam_policy_document.lambda_logging.json
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_logs" {
-  role       = aws_iam_role.iam_for_lambda.name
-  policy_arn = aws_iam_policy.lambda_logging.arn
-}
 
 resource "aws_lambda_function" "lambda_function" {
   function_name = "lambda_function"

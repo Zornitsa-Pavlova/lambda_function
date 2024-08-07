@@ -23,7 +23,7 @@ jobs:
         with:
           args: >-
             -Dsonar.projectKey=Zornitsa-Pavlova_lambda_function
-            -Dsonar.organization=zornitsa-pavlova
+            -Dsonar.organization=Zornitsa-Pavlova
 
   test:
     runs-on: ubuntu-latest

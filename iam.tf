@@ -131,13 +131,13 @@ resource "aws_sns_topic_subscription" "lambda_alarm_subscription" {
   endpoint  = aws_lambda_function.lambda_function.arn
 }
 
-resource "aws_lambda_permission" "allow_sns" {
-  statement_id  = "AllowExecutionFromSNS"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function.function_name
-  principal     = "sns.amazonaws.com"
-  source_arn    = aws_sns_topic.lambda_alarm_topic.arn
-}
+# resource "aws_lambda_permission" "allow_sns" {
+#   statement_id  = "AllowExecutionFromSNS"
+#   action        = "lambda:InvokeFunction"
+#   function_name = aws_lambda_function.lambda_function.function_name
+#   principal     = "sns.amazonaws.com"
+#   source_arn    = aws_sns_topic.lambda_alarm_topic.arn
+# }
 
 resource "aws_sqs_queue" "dlq" {
   name = "my-dlq"

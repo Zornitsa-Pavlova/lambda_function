@@ -66,6 +66,12 @@ resource "aws_lambda_function" "lambda_function" {
   memory_size      = 128
   timeout          = 10
 
+  
+#  dead_letter_config {
+#     target_arn = aws_sqs_queue.dlq.arn
+#   }
+
+
   environment {
       variables =  {
         BUKET_NAME = aws_s3_bucket.lambda_bucket.id

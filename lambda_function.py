@@ -33,9 +33,6 @@ def lambda_handler(event, context):
                     'body': json.dumps(f'Error uploading to S3: {str(e)}')
                 }
 
-            # Process the messages as needed
-            # ...
-
         return {
             'statusCode': 200,
             'body': json.dumps({

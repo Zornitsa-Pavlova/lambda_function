@@ -29,8 +29,8 @@ resource "aws_sqs_queue" "message_queue" {
 
 data "archive_file" "lambda_zip" {
   type = "zip"
-  source_file = "/home/luser/project/modules/lambda_function.py"
-  output_path = "/home/luser/project/modules/lambda_function.zip"
+  source_file = "/home/luser/project/lambda_function.py"
+  output_path = "/home/luser/project/lambda_function.zip"
 }
 
 

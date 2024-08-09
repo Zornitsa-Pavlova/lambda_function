@@ -18,4 +18,3 @@ variable "policy_name" {
   description = "lambda_policy"
   type        = string
 }
-

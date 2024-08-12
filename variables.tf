@@ -18,3 +18,9 @@ variable "policy_name" {
   description = "lambda_policy"
   type        = string
 }
+
+variable "dynamodb_table_name" {
+  description = "The name of the DynamoDB table"
+  type        = string
+  default     = "LambdaDynamodb"
+}

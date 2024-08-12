@@ -15,14 +15,9 @@ resource "aws_iam_role" "lambda_role" {
 EOF
 }
 
-# resource "aws_cloudwatch_log_group" "lambda_log_group" {
-#   name              = "/aws/lambda/${aws_lambda_function.lambda_function.function_name}"
-#   retention_in_days = 7
-# }
-
 resource "aws_iam_policy" "lambda_policy" {
   name        = "lambda-s3-policy"
-  description = "IAM policy for Lambda to access S3"
+  description = "IAM policy for Lambda to access S3 and SQS"
 
   policy = <<EOF
 {
@@ -107,19 +102,47 @@ resource "aws_iam_policy" "function_logging_policy" {
   })
 }
 
-# resource "aws_lambda_function" "lambda_function" {
-#   function_name = "lambda_function"
-#   role          = aws_iam_role.lambda_role.arn
-#   handler       = "lambda_function.lambda_handler"
-#   runtime       = "python3.9"
-#   filename      = "lambda_function.zip"
+resource "aws_dynamodb_table" "example" {
+  name           = var.dynamodb_table_name
+  billing_mode   = "PAY_PER_REQUEST"
+  hash_key       = "PrimaryKey"
 
-#   environment {
-#     variables = {
-#       LOG_GROUP_NAME = aws_cloudwatch_log_group.lambda_log_group.name
-#     }
-#   }
-# }
+  attribute {
+    name = "PrimaryKey"
+    type = "S"
+  }
+
+  tags = {
+    Name = "example-table"
+  }
+}
+
+resource "aws_iam_policy" "lambda_dynamodb_policy" {
+  name        = "lambda-dynamodb-policy"
+  description = "IAM policy for Lambda to access DynamoDB"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": "arn:aws:dynamodb:${var.aws_region}:${data.aws_caller_identity.current.account_id}:table/${var.dynamodb_table_name}"
+    }
+  ]
+}
+EOF
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_dynamodb_policy_attachment" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_dynamodb_policy.arn
+}
 
 resource "aws_sns_topic" "lambda_alarm_topic" {
   name = "lambda-alarm-topic"
@@ -131,29 +154,9 @@ resource "aws_sns_topic_subscription" "lambda_alarm_subscription" {
   endpoint  = aws_lambda_function.lambda_function.arn
 }
 
-# resource "aws_lambda_permission" "allow_sns" {
-#   statement_id  = "AllowExecutionFromSNS"
-#   action        = "lambda:InvokeFunction"
-#   function_name = aws_lambda_function.lambda_function.function_name
-#   principal     = "sns.amazonaws.com"
-#   source_arn    = aws_sns_topic.lambda_alarm_topic.arn
-# }
-
 resource "aws_sqs_queue" "dlq" {
   name = "my-dlq"
 }
-
-# resource "aws_lambda_function" "my_lambda" {
-#   function_name = "my-lambda"
-#   role          = aws_iam_role.lambda_role.arn
-#   handler       = "index.lambda_handler"
-#   runtime       = "python3.9"
-#   filename      = "lambda_function_payload.zip"
-
-#   dead_letter_config {
-#     target_arn = aws_sqs_queue.dlq.arn
-#   }
-# }
 
 resource "aws_iam_role_policy_attachment" "lambda_logging_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
@@ -168,9 +171,4 @@ resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
 resource "aws_iam_role_policy_attachment" "lambda_s3_policy_attachment" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.lambda_policy.arn
-}
-
-resource "aws_iam_role_policy_attachment" "function_logging_policy_attachment" {
-  role       = aws_iam_role.lambda_role.id
-  policy_arn = aws_iam_policy.function_logging_policy.arn
 }

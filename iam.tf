@@ -18,7 +18,6 @@ EOF
 resource "aws_iam_policy" "lambda_policy" {
   name        = "lambda-s3-policy"
   description = "IAM policy for Lambda to access S3 and SQS"
-
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -47,7 +46,6 @@ EOF
 
 resource "aws_s3_bucket_policy" "lambda_bucket_policy" {
   bucket = aws_s3_bucket.lambda_bucket.id
-
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -111,7 +109,6 @@ resource "aws_dynamodb_table" "example" {
     name = "PrimaryKey"
     type = "S"
   }
-
   tags = {
     Name = "example-table"
   }

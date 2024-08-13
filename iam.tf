@@ -16,8 +16,8 @@ EOF
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "lambda-s3-policy"
-  description = "IAM policy for Lambda to access S3 and SQS"
+  name        = "lambda-s3-sqs-sns-policy"
+  description = "IAM policy for Lambda to access S3, SQS, and SNS"
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -37,7 +37,16 @@ resource "aws_iam_policy" "lambda_policy" {
         "sqs:DeleteMessage",
         "sqs:GetQueueAttributes"
       ],
-      "Resource": "${aws_sqs_queue.message_queue.arn}"
+      "Resource": "arn:aws:sqs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_sqs_queue.message_queue.name}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "sns:Publish",
+        "sns:Subscribe",
+        "sns:Receive"
+      ],
+      "Resource": "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_sns_topic.lambda_alarm_topic.name}"
     }
   ]
 }

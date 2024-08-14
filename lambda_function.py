@@ -13,6 +13,7 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     logger.info("Received event: " + json.dumps(event, indent=2))
     message = None
+    file_key = "message.txt"
     if 'Records' in event:
         for record in event['Records']:
             try:

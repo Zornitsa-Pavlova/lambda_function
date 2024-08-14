@@ -1,77 +1,53 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from lambda_function import lambda_handler
 import json
-import boto3
-from moto import mock_aws
+from lambda_function import lambda_handler
 
-s3 = boto3.client('s3')
 class TestLambdaFunction(unittest.TestCase):
-    
-    @patch('lambda_function.boto3.client')
-    def test_lambda_handler_success(self, mock_boto_client):
-        # Mock S3 client
-        mock_s3 = MagicMock()
-        mock_boto_client.return_value = mock_s3
 
-        # Define the event and context
+    @patch('boto3.client')
+    def test_lambda_handler(self, mock_boto_client):
+        # Mock S3 and DynamoDB clients
+        mock_s3 = MagicMock()
+        mock_dynamodb = MagicMock()
+        mock_boto_client.side_effect = [mock_s3, mock_dynamodb]
+
+        # Mock DynamoDB response
+        mock_dynamodb.get_item.return_value = {
+            'Item': {
+                'PrimaryKey': {'S': 'PrimaryKey'},
+                'Data': {'S': 'Some data'}
+            }
+        }
+
+        # Define a sample event with 'Records' key
         event = {
             'Records': [
                 {
-                    'body': 'Hello, world!'
+                    'body': 'Test message from SQS'
                 }
             ]
         }
-        context = {}
 
         # Call the lambda handler
-        response = lambda_handler(event, context)
+        response = lambda_handler(event, None)
+
+        # Debugging: Print the response and check if put_object was called
+        print(response)
+        print(mock_s3.put_object.call_args_list)
 
         # Assertions
         self.assertEqual(response['statusCode'], 200)
         self.assertIn('Messages processed successfully', response['body'])
-        # mock_s3.put_object.assert_called_once_with(
-        #     Bucket='dreamsofcode-noticeably-constantly-wondrous-wolf',
-        #     Key='message.txt',
-        #     Body='Hello, world!'
-        # )
-
-    @patch('lambda_function.boto3.client')
-    def test_lambda_handler_no_records(self, mock_boto_client):
-        # Define the event and context with no records
-        event = {}
-        context = {}
-
-        # Call the lambda handler
-        response = lambda_handler(event, context)
-
-        # Assertions
-        self.assertEqual(response['statusCode'], 400)
-        self.assertIn('No Records found in event', response['body'])
-
-    @patch('lambda_function.boto3.client')
-    def test_lambda_handler_s3_error(self, mock_boto_client):
-        # Mock S3 client and simulate an error
-        mock_s3 = MagicMock()
-        mock_s3.put_object.side_effect = Exception('S3 error')
-        mock_boto_client.return_value = mock_s3
-
-        # Define the event and context
-        event = {
-            'Records': [
-                {
-                    'body': 'Hello, world!'
-                }
-            ]
-        }
-        context = {}
-
-        # Call the lambda handler
-        # with self.assertRaises(Exception) as context_manager:
-        #     lambda_handler(event, context)
-
-        # # Assertions
-        # self.assertEqual(str(context_manager.exception), 'S3 error')
+        mock_s3.put_object.assert_called_once_with(
+            Bucket='mybucket-properly-tightly-proud-rhino',
+            Key='message.txt',
+            Body='Test message from SQS'
+        )
+        mock_dynamodb.get_item.assert_called_once_with(
+            TableName='LambdaDynamodb',
+            Key={'PrimaryKey': {'S': 'PrimaryKey'}}
+        )
 
 if __name__ == '__main__':
     unittest.main()

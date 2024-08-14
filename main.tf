@@ -111,7 +111,7 @@ resource "aws_dynamodb_table" "LambdaDynamodb" {
   tags = {
     Name = "LambdaDynamodb"
   }
-}
+} 
 
 
 # resource "aws_iam_role" "lambda_role" {

@@ -1,7 +1,6 @@
 import json
 import boto3
 import logging
-import json 
 
 s3 = boto3.client('s3')
 dynamodb = boto3.client('dynamodb')

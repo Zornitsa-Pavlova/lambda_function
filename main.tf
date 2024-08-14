@@ -99,19 +99,20 @@ resource "aws_lambda_event_source_mapping" "my_lambda" {
 ## DynamoDB
 
 resource "aws_dynamodb_table" "LambdaDynamodb" {
-  name           = var.dynamodb_table_name
+  name           = "LambdaDynamodb"  # Directly setting the table name
   billing_mode   = "PAY_PER_REQUEST"
   hash_key       = "PrimaryKey"
 
   attribute {
     name = "PrimaryKey"
-    type = "S"
+    type = "S"  # 'S' stands for String type
   }
 
   tags = {
     Name = "LambdaDynamodb"
   }
 }
+
 
 # resource "aws_iam_role" "lambda_role" {
 #   name = "lambda_function-role"

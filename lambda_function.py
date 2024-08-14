@@ -1,11 +1,12 @@
 import json
 import boto3
 import logging
+import json 
 
 s3 = boto3.client('s3')
 dynamodb = boto3.client('dynamodb')
-bucket_name = 'dreamsofcode-noticeably-constantly-wondrous-wolf'
-table_name = 'YourDynamoDBTableName'
+bucket_name = 'mybucket-properly-tightly-proud-rhino'
+table_name = 'LambdaDynamodb'
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -17,8 +18,8 @@ def lambda_handler(event, context):
         for record in event['Records']:
             try:
                 # Check if the event is from SNS
-                if 'Sns' in record:
-                    message = record['Sns']['Message']
+                if 'SNS' in record:
+                    message = record['SNS']['Message']
                     logger.info(f"Message from SNS: {message}")
                 else:
                     # Read message from SQS
@@ -29,7 +30,7 @@ def lambda_handler(event, context):
                 response = dynamodb.get_item(
                     TableName=table_name,
                     Key={
-                        'PrimaryKey': {'S': 'YourPrimaryKeyValue'}
+                        'PrimaryKey': {'S': 'PrimaryKey'}
                     }
                 )
                 dynamodb_data = response.get('Item')
@@ -46,7 +47,7 @@ def lambda_handler(event, context):
 
             except Exception as e:
                 logger.error(f"Error processing record: {e}")
-                raise e  # Ensure the error is raised to trigger retries/DLQ
+                # raise e  # Ensure the error is raised to trigger retries/DLQ
 
         return {
             'statusCode': 200,

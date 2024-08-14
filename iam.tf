@@ -16,8 +16,9 @@ EOF
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "lambda-s3-sqs-sns-policy"
-  description = "IAM policy for Lambda to access S3, SQS, and SNS"
+  name        = "lambda-s3-policy"
+  description = "IAM policy for Lambda to access S3 and SQS"
+
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -37,16 +38,7 @@ resource "aws_iam_policy" "lambda_policy" {
         "sqs:DeleteMessage",
         "sqs:GetQueueAttributes"
       ],
-      "Resource": "arn:aws:sqs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_sqs_queue.message_queue.name}"
-    },
-    {
-      "Effect": "Allow",
-      "Action": [
-        "sns:Publish",
-        "sns:Subscribe",
-        "sns:Receive"
-      ],
-      "Resource": "arn:aws:sns:${var.aws_region}:${data.aws_caller_identity.current.account_id}:${aws_sns_topic.lambda_alarm_topic.name}"
+      "Resource": "${aws_sqs_queue.message_queue.arn}"
     }
   ]
 }
@@ -55,6 +47,7 @@ EOF
 
 resource "aws_s3_bucket_policy" "lambda_bucket_policy" {
   bucket = aws_s3_bucket.lambda_bucket.id
+
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -118,8 +111,9 @@ resource "aws_dynamodb_table" "example" {
     name = "PrimaryKey"
     type = "S"
   }
+
   tags = {
-    Name = "example-table"
+    Name = "LambdaDynamodb"
   }
 }
 
